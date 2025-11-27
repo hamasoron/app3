@@ -1,0 +1,82 @@
+services:
+  # MySQL database
+  db:
+    image: mysql:8.0
+    container_name: matching-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: matchingdb
+      MYSQL_USER: matchinguser
+      MYSQL_PASSWORD: matchingpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - matching-network
+
+  # Django backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: matching-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=django-insecure-development-key-change-in-production
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend
+      - DB_ENGINE=django.db.backends.mysql
+      - DB_NAME=matchingdb
+      - DB_USER=matchinguser
+      - DB_PASSWORD=matchingpassword
+      - DB_HOST=db
+      - DB_PORT=3306
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+    volumes:
+      - ./backend:/app
+      - backend_static:/app/staticfiles
+      - backend_media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+    networks:
+      - matching-network
+
+  # Next.js frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: matching-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    networks:
+      - matching-network
+
+volumes:
+  mysql_data:
+  backend_static:
+  backend_media:
+
+networks:
+  matching-network:
+    driver: bridge
