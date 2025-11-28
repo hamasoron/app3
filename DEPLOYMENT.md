@@ -61,26 +61,26 @@ cd ~/Desktop/app3
 
 ```bash
 # フォアグラウンドで全てのコンテナをビルドして起動
-docker-compose up --build
+docker compose up --build
 
 # バックグラウンドで全てのコンテナをビルドして起動（推奨）
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 #### 3. データベースマイグレーション
 
 ```bash
 # マイグレーションファイルを作成（初回のみ）
-docker-compose exec backend python manage.py makemigrations
+docker compose exec backend python manage.py makemigrations
 
 # マイグレーション実行
-docker-compose exec backend python manage.py migrate
+docker compose exec backend python manage.py migrate
 
 # マイグレーション状態を確認
-docker-compose exec backend python manage.py showmigrations
+docker compose exec backend python manage.py showmigrations
 
 # スーパーユーザー作成（管理画面用）
-docker-compose exec backend python manage.py createsuperuser
+docker compose exec backend python manage.py createsuperuser
 ```
 
 **⚠️ 重要: 初回起動時の注意**
@@ -89,29 +89,29 @@ docker-compose exec backend python manage.py createsuperuser
 
 ```bash
 # migrationsフォルダを作成
-docker-compose exec backend mkdir -p blog/migrations
-docker-compose exec backend touch blog/migrations/__init__.py
+docker compose exec backend mkdir -p blog/migrations
+docker compose exec backend touch blog/migrations/__init__.py
 
 # マイグレーションファイルを作成
-docker-compose exec backend python manage.py makemigrations blog
+docker compose exec backend python manage.py makemigrations blog
 
 # マイグレーション実行
-docker-compose exec backend python manage.py migrate
+docker compose exec backend python manage.py migrate
 ```
 
 #### 4. 起動確認
 
 ```bash
 # コンテナの状態を確認
-docker-compose ps
+docker compose ps
 
 # ログを確認（エラーがある場合）
-docker-compose logs
+docker compose logs
 
 # 特定のコンテナのログを確認
-docker-compose logs backend
-docker-compose logs frontend
-docker-compose logs db
+docker compose logs backend
+docker compose logs frontend
+docker compose logs db
 ```
 
 #### 5. アクセス
@@ -125,10 +125,10 @@ docker-compose logs db
 
 ```bash
 # 全てのコンテナを停止（データは保持される）
-docker-compose down
+docker compose down
 
 # 全てのコンテナを停止 + ボリュームも削除（⚠️ データベースのデータが完全に削除される）
-docker-compose down -v
+docker compose down -v
 ```
 
 ### メリット
@@ -310,19 +310,19 @@ resource "aws_rds_cluster" "main" {
 
 ```bash
 # ログを確認
-docker-compose logs
+docker compose logs
 
 # 特定のコンテナのログ
-docker-compose logs backend
-docker-compose logs frontend
-docker-compose logs db
+docker compose logs backend
+docker compose logs frontend
+docker compose logs db
 
 # コンテナの状態を確認
-docker-compose ps
+docker compose ps
 
 # 完全にクリーンアップして再起動
-docker-compose down -v
-docker-compose up -d --build
+docker compose down -v
+docker compose up -d --build
 ```
 
 ### マイグレーションエラー: Table doesn't exist
@@ -338,16 +338,16 @@ django.db.utils.ProgrammingError: (1146, "Table 'matchingdb.blog_profile' doesn'
 
 ```bash
 # マイグレーション状態を確認
-docker-compose exec backend python manage.py showmigrations
+docker compose exec backend python manage.py showmigrations
 
 # blogアプリが表示されない場合
-docker-compose exec backend mkdir -p blog/migrations
-docker-compose exec backend touch blog/migrations/__init__.py
-docker-compose exec backend python manage.py makemigrations blog
-docker-compose exec backend python manage.py migrate
+docker compose exec backend mkdir -p blog/migrations
+docker compose exec backend touch blog/migrations/__init__.py
+docker compose exec backend python manage.py makemigrations blog
+docker compose exec backend python manage.py migrate
 
 # 確認
-docker-compose exec backend python manage.py showmigrations blog
+docker compose exec backend python manage.py showmigrations blog
 ```
 
 ### AWS: デプロイエラー

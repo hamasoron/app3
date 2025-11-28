@@ -44,17 +44,17 @@ cp backend/.env.example backend/.env
 
 ```bash
 # 全てのコンテナをビルドして起動
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ### ステップ4: データベースマイグレーション
 
 ```bash
 # マイグレーション実行
-docker-compose exec backend python manage.py migrate
+docker compose exec backend python manage.py migrate
 
 # スーパーユーザー作成（管理画面アクセス用）
-docker-compose exec backend python manage.py createsuperuser
+docker compose exec backend python manage.py createsuperuser
 ```
 
 ### ステップ5: アクセス確認
@@ -68,10 +68,10 @@ docker-compose exec backend python manage.py createsuperuser
 
 ```bash
 # コンテナ停止
-docker-compose down
+docker compose down
 
 # コンテナ停止 + ボリューム削除（データベースも削除）
-docker-compose down -v
+docker compose down -v
 ```
 
 ---
@@ -147,7 +147,7 @@ FLUSH PRIVILEGES;
 
 ```bash
 # Django shell起動
-docker-compose exec backend python manage.py shell
+docker compose exec backend python manage.py shell
 
 # または
 python manage.py shell
@@ -225,7 +225,7 @@ pymysql.install_as_MySQLdb()
 ```bash
 # MySQLが起動しているか確認
 # Docker:
-docker-compose ps
+docker compose ps
 
 # ローカル:
 # Windows: サービスマネージャーでMySQLを確認
@@ -256,24 +256,24 @@ npm install
 
 ```bash
 # 全てのコンテナのログ
-docker-compose logs
+docker compose logs
 
 # 特定のコンテナのログ
-docker-compose logs backend
-docker-compose logs frontend
+docker compose logs backend
+docker compose logs frontend
 
 # ログをリアルタイム表示
-docker-compose logs -f backend
+docker compose logs -f backend
 ```
 
 ### データベースリセット
 
 ```bash
 # データベースをリセット
-docker-compose down -v
-docker-compose up -d
-docker-compose exec backend python manage.py migrate
-docker-compose exec backend python manage.py createsuperuser
+docker compose down -v
+docker compose up -d
+docker compose exec backend python manage.py migrate
+docker compose exec backend python manage.py createsuperuser
 ```
 
 ---

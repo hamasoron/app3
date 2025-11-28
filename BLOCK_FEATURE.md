@@ -255,16 +255,16 @@ if block.blocker != request.user:
 
 ```bash
 # マイグレーションファイル作成
-docker-compose exec backend python manage.py makemigrations
+docker compose exec backend python manage.py makemigrations
 
 # マイグレーション実行
-docker-compose exec backend python manage.py migrate
+docker compose exec backend python manage.py migrate
 ```
 
 ### 2. バックエンド再起動
 
 ```bash
-docker-compose restart backend
+docker compose restart backend
 ```
 
 ### 3. フロントエンド確認

@@ -236,13 +236,13 @@ const [receivedRes, sentRes, matchesRes] = await Promise.all([
 
 ```bash
 # Docker Composeで起動
-docker-compose up -d --build
+docker compose up -d --build
 
 # マイグレーション実行（初回のみ）
-docker-compose exec backend python manage.py migrate
+docker compose exec backend python manage.py migrate
 
 # フロントエンドの依存関係インストール（初回のみ）
-docker-compose exec frontend npm install
+docker compose exec frontend npm install
 ```
 
 ### アクセス

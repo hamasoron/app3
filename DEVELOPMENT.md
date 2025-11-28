@@ -74,10 +74,10 @@ git checkout -b feat/your-feature-name
 
 ```bash
 # Docker Composeで起動
-docker-compose up -d --build
+docker compose up -d --build
 
 # ログを確認
-docker-compose logs -f backend
+docker compose logs -f backend
 ```
 
 ### 3. 変更を加える
@@ -132,13 +132,13 @@ git push origin --delete feat/your-feature-name
 cd APP3
 
 # コンテナをビルドして起動
-docker-compose up -d --build
+docker compose up -d --build
 
 # マイグレーション実行
-docker-compose exec backend python manage.py migrate
+docker compose exec backend python manage.py migrate
 
 # スーパーユーザー作成
-docker-compose exec backend python manage.py createsuperuser
+docker compose exec backend python manage.py createsuperuser
 
 # アクセス
 # フロントエンド: http://localhost:3000
@@ -208,10 +208,10 @@ npm update
 
 ```bash
 # Docker Composeの場合
-docker-compose down -v
-docker-compose up -d --build
-docker-compose exec backend python manage.py migrate
-docker-compose exec backend python manage.py createsuperuser
+docker compose down -v
+docker compose up -d --build
+docker compose exec backend python manage.py migrate
+docker compose exec backend python manage.py createsuperuser
 
 # ローカル環境の場合
 cd backend
@@ -224,7 +224,7 @@ python manage.py createsuperuser
 
 ```bash
 # Django shellで実行
-docker-compose exec backend python manage.py shell
+docker compose exec backend python manage.py shell
 ```
 
 ```python
@@ -263,7 +263,7 @@ Profile.objects.create(
 
 ```bash
 # Docker Composeの場合
-docker-compose logs -f backend
+docker compose logs -f backend
 
 # ローカルの場合
 # コンソールに出力される
@@ -273,7 +273,7 @@ docker-compose logs -f backend
 
 ```bash
 # Docker Composeの場合
-docker-compose logs -f frontend
+docker compose logs -f frontend
 
 # ローカルの場合
 # ブラウザのDevToolsで確認
@@ -283,7 +283,7 @@ docker-compose logs -f frontend
 
 ```bash
 # MySQLに接続
-docker-compose exec db mysql -u matchinguser -p matchingdb
+docker compose exec db mysql -u matchinguser -p matchingdb
 
 # テーブル一覧
 SHOW TABLES;
@@ -318,17 +318,17 @@ kill -9 <PID>
 
 ```bash
 # ログを確認
-docker-compose logs
+docker compose logs
 
 # コンテナの状態を確認
-docker-compose ps
+docker compose ps
 
 # 完全にクリーンアップ
-docker-compose down -v
+docker compose down -v
 docker system prune -a
 
 # 再起動
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ### マイグレーションエラー
@@ -338,12 +338,12 @@ docker-compose up -d --build
 # backend/blog/migrations/ 内の __init__.py 以外を削除
 
 # データベースをリセット
-docker-compose down -v
-docker-compose up -d
+docker compose down -v
+docker compose up -d
 
 # 新しいマイグレーションを作成
-docker-compose exec backend python manage.py makemigrations
-docker-compose exec backend python manage.py migrate
+docker compose exec backend python manage.py makemigrations
+docker compose exec backend python manage.py migrate
 ```
 
 ### CORS エラー
@@ -372,8 +372,8 @@ class NewModel(models.Model):
 2. **マイグレーションを作成**
 
 ```bash
-docker-compose exec backend python manage.py makemigrations
-docker-compose exec backend python manage.py migrate
+docker compose exec backend python manage.py makemigrations
+docker compose exec backend python manage.py migrate
 ```
 
 3. **シリアライザーを作成**

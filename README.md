@@ -92,13 +92,13 @@ git clone <repository-url>
 cd app3
 
 # Docker Composeで起動
-docker-compose up -d --build
+docker compose up -d --build
 
 # マイグレーション実行
-docker-compose exec backend python manage.py migrate
+docker compose exec backend python manage.py migrate
 
 # スーパーユーザー作成（任意）
-docker-compose exec backend python manage.py createsuperuser
+docker compose exec backend python manage.py createsuperuser
 ```
 
 ### アクセス
@@ -129,10 +129,10 @@ docker-compose exec backend python manage.py createsuperuser
 
 ```bash
 # バックエンドテスト
-docker-compose exec backend python manage.py test
+docker compose exec backend python manage.py test
 
 # フロントエンドテスト
-docker-compose exec frontend npm test
+docker compose exec frontend npm test
 ```
 
 ---
