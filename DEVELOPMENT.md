@@ -14,9 +14,7 @@ main（本番環境）
   └─ feat/message-feature
 ```
 
-**注:** GitHub Flow を採用（シンプルな個人開発向け）
-
-### ブランチ命名規則
+### ブランチ命名規則(GitHub Flow)
 
 - `feat/*` - 新機能（例: `feat/add-like-feature`）
 - `fix/*` - バグ修正（例: `fix/login-error`）
@@ -31,9 +29,7 @@ main（本番環境）
 - `feat` = feature の短縮形
 - コミットメッセージと一貫性を保つ
 
-## 📝 コミットメッセージ規約
-
-明確で説明的なコミットメッセージを使用します（Conventional Commits）：
+## 📝 コミットメッセージ規約(Conventional Commits)
 
 ```bash
 # フォーマット
