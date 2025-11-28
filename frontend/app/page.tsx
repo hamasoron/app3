@@ -48,7 +48,7 @@ export default function Home() {
         </div>
         <div className="mt-12 text-center">
           <p className="text-sm text-gray-500">
-            SREエンジニア ポートフォリオプロジェクト
+            © 2025 Hamasoron | SRE Engineer | All rights reserved
           </p>
         </div>
       </div>
