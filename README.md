@@ -21,8 +21,10 @@ Django REST Framework + Next.js(TypeScript) + MySQL で構築されたシンプ�
   
 - ✅ **マッチング機能**
   - ユーザー検索・一覧表示
-  - いいね機能
+  - いいね送信機能
+  - いいね承認/拒否機能
   - 相互いいね（マッチング）検出
+  - マッチング成立通知
 
 - ✅ **メッセージ機能**
   - マッチングしたユーザー同士でメッセージ交換
@@ -113,6 +115,7 @@ docker-compose exec backend python manage.py createsuperuser
 - [セットアップガイド](./SETUP.md) - 開発環境構築
 - [デプロイガイド](./DEPLOYMENT.md) - 本番環境デプロイ
 - [API仕様書](./docs/API.md) - REST API仕様
+- [マッチング機能ガイド](./docs/MATCHING_FEATURE.md) - マッチング機能の詳細
 
 ---
 
@@ -143,11 +146,13 @@ docker-compose exec frontend npm test
 - [x] ユーザー認証（JWT）
 - [x] プロフィール管理
 
-### Phase 2: マッチング機能（予定）
-- [ ] いいね機能
-- [ ] マッチング検出
-- [ ] メッセージ機能
-- [ ] プロフィール検索
+### Phase 2: マッチング機能 ✅
+- [x] いいね機能
+- [x] いいね承認/拒否機能
+- [x] マッチング検出
+- [x] マッチング成立通知
+- [x] メッセージ機能
+- [x] プロフィール検索
 
 ### Phase 3: SRE機能実装（予定）
 - [ ] Redis キャッシング

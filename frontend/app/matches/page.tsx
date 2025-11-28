@@ -22,10 +22,21 @@ export default function MatchesPage() {
   const router = useRouter();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   useEffect(() => {
+    fetchCurrentUser();
     fetchMatches();
   }, []);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await api.get('/api/blog/profiles/me/');
+      setCurrentUserId(response.data.user.id);
+    } catch (error) {
+      console.error('ユーザー情報の取得に失敗しました', error);
+    }
+  };
 
   const fetchMatches = async () => {
     try {
@@ -37,6 +48,51 @@ export default function MatchesPage() {
       console.error('マッチング一覧の取得に失敗しました', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUnmatch = async (matchId: number) => {
+    if (!confirm('このマッチングを解除しますか？\nメッセージ履歴も削除されます。')) {
+      return;
+    }
+    
+    try {
+      await api.delete(`/api/blog/matches/${matchId}/`);
+      alert('マッチングを解除しました');
+      fetchMatches();
+    } catch (error) {
+      console.error('マッチング解除エラー:', error);
+      alert('マッチングの解除に失敗しました');
+    }
+  };
+
+  const handleBlock = async (match: Match) => {
+    // 相手のユーザーIDを取得
+    const otherUserId = match.user1_profile.username === currentUserId 
+      ? match.user2_profile.username 
+      : match.user1_profile.username;
+    
+    const reason = prompt('ブロック理由を入力してください（任意）:') || '';
+    
+    if (!confirm(`${otherUserId}さんをブロックしますか？\nマッチングとメッセージも削除されます。`)) {
+      return;
+    }
+    
+    try {
+      // 相手のユーザーIDを取得（user1 or user2）
+      const blockedUserId = currentUserId === match.user1_profile.user_id 
+        ? match.user2_profile.user_id 
+        : match.user1_profile.user_id;
+      
+      await api.post('/api/blog/blocks/', {
+        blocked_user: blockedUserId,
+        reason: reason
+      });
+      alert('ユーザーをブロックしました');
+      fetchMatches();
+    } catch (error) {
+      console.error('ブロックエラー:', error);
+      alert('ブロックに失敗しました');
     }
   };
 
@@ -60,6 +116,9 @@ export default function MatchesPage() {
               </Link>
               <Link href="/profiles" className="text-gray-700 hover:text-pink-600">
                 ユーザー検索
+              </Link>
+              <Link href="/likes" className="text-gray-700 hover:text-pink-600">
+                いいね
               </Link>
               <Link href="/matches" className="text-pink-600 font-semibold">
                 マッチング
@@ -87,7 +146,7 @@ export default function MatchesPage() {
             {matches.map((match) => (
               <div key={match.id} className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-lg font-semibold">
                       💕 {match.user1_profile.display_name} ✕ {match.user2_profile.display_name}
                     </h3>
@@ -95,12 +154,28 @@ export default function MatchesPage() {
                       マッチング日時: {new Date(match.created_at).toLocaleDateString('ja-JP')}
                     </p>
                   </div>
-                  <Link
-                    href={`/messages?match=${match.id}`}
-                    className="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700"
-                  >
-                    メッセージ
-                  </Link>
+                  <div className="flex space-x-2">
+                    <Link
+                      href={`/messages?match=${match.id}`}
+                      className="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700"
+                    >
+                      メッセージ
+                    </Link>
+                    <button
+                      onClick={() => handleUnmatch(match.id)}
+                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                      title="マッチング解除"
+                    >
+                      解除
+                    </button>
+                    <button
+                      onClick={() => handleBlock(match)}
+                      className="px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                      title="ブロック"
+                    >
+                      ブロック
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

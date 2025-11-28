@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Profile, Like, Match, Message
+from .models import Profile, Like, Match, Message, Block
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -69,7 +69,7 @@ class MatchSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     """メッセージシリアライザ"""
     sender_username = serializers.CharField(source='sender.username', read_only=True)
-    sender_display_name = serializers.CharField(source='sender.profile.display_name', read_only=True)
+    sender_display_name = serializers.SerializerMethodField()
     
     class Meta:
         model = Message
@@ -78,6 +78,13 @@ class MessageSerializer(serializers.ModelSerializer):
             'content', 'is_read', 'created_at'
         ]
         read_only_fields = ['id', 'sender', 'created_at']
+    
+    def get_sender_display_name(self, obj):
+        """送信者の表示名を取得（プロフィールがない場合はユーザー名を返す）"""
+        try:
+            return obj.sender.profile.display_name
+        except:
+            return obj.sender.username
 
 
 class MessageCreateSerializer(serializers.ModelSerializer):
@@ -85,5 +92,16 @@ class MessageCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['match', 'content']
+
+
+class BlockSerializer(serializers.ModelSerializer):
+    """ブロックシリアライザ"""
+    blocked_profile = ProfileListSerializer(source='blocked.profile', read_only=True)
+    blocked_username = serializers.CharField(source='blocked.username', read_only=True)
+    
+    class Meta:
+        model = Block
+        fields = ['id', 'blocker', 'blocked', 'blocked_username', 'blocked_profile', 'reason', 'created_at']
+        read_only_fields = ['id', 'blocker', 'created_at']
 
 

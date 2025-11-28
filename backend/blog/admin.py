@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Like, Match, Message
+from .models import Profile, Like, Match, Message, Block
 
 
 @admin.register(Profile)
@@ -36,5 +36,13 @@ class MessageAdmin(admin.ModelAdmin):
     def content_preview(self, obj):
         return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
     content_preview.short_description = 'メッセージ'
+
+
+@admin.register(Block)
+class BlockAdmin(admin.ModelAdmin):
+    list_display = ['blocker', 'blocked', 'reason', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['blocker__username', 'blocked__username', 'reason']
+    readonly_fields = ['created_at']
 
 

@@ -10,9 +10,15 @@ export default function DashboardPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    receivedLikes: 0,
+    sentLikes: 0,
+    matches: 0,
+  });
 
   useEffect(() => {
     fetchProfile();
+    fetchStats();
   }, []);
 
   const fetchProfile = async () => {
@@ -23,6 +29,34 @@ export default function DashboardPage() {
       console.error('プロフィールの取得に失敗しました', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const [receivedRes, sentRes, matchesRes] = await Promise.all([
+        api.get('/api/blog/likes/received/'),
+        api.get('/api/blog/likes/sent/'),
+        api.get('/api/blog/matches/')
+      ]);
+      
+      const receivedData = Array.isArray(receivedRes.data) 
+        ? receivedRes.data 
+        : receivedRes.data.results || [];
+      const sentData = Array.isArray(sentRes.data) 
+        ? sentRes.data 
+        : sentRes.data.results || [];
+      const matchesData = Array.isArray(matchesRes.data) 
+        ? matchesRes.data 
+        : matchesRes.data.results || [];
+      
+      setStats({
+        receivedLikes: receivedData.length,
+        sentLikes: sentData.length,
+        matches: matchesData.length,
+      });
+    } catch (error) {
+      console.error('統計情報の取得に失敗しました', error);
     }
   };
 
@@ -55,6 +89,9 @@ export default function DashboardPage() {
               <Link href="/profiles" className="text-gray-700 hover:text-pink-600">
                 ユーザー検索
               </Link>
+              <Link href="/likes" className="text-gray-700 hover:text-pink-600">
+                いいね
+              </Link>
               <Link href="/matches" className="text-gray-700 hover:text-pink-600">
                 マッチング
               </Link>
@@ -75,6 +112,45 @@ export default function DashboardPage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <h2 className="text-2xl font-bold mb-6">ダッシュボード</h2>
+
+          {/* 統計カード */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <Link href="/likes" className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 bg-pink-100 rounded-full p-3">
+                  <span className="text-2xl">❤️</span>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">受信したいいね</p>
+                  <p className="text-2xl font-bold text-pink-600">{stats.receivedLikes}</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/likes" className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 bg-blue-100 rounded-full p-3">
+                  <span className="text-2xl">💌</span>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">送信したいいね</p>
+                  <p className="text-2xl font-bold text-blue-600">{stats.sentLikes}</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/matches" className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 bg-green-100 rounded-full p-3">
+                  <span className="text-2xl">💕</span>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">マッチング数</p>
+                  <p className="text-2xl font-bold text-green-600">{stats.matches}</p>
+                </div>
+              </div>
+            </Link>
+          </div>
 
           {profile ? (
             <div className="bg-white shadow overflow-hidden sm:rounded-lg">

@@ -7,11 +7,13 @@ import api from '@/lib/api';
 
 interface Profile {
   id: number;
+  user_id: number;
   username: string;
   display_name: string;
   age: number | null;
   location: string;
   bio: string;
+  avatar: string | null;
 }
 
 export default function ProfilesPage() {
@@ -19,6 +21,7 @@ export default function ProfilesPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [matchNotification, setMatchNotification] = useState<{show: boolean, matchId: number | null}>({show: false, matchId: null});
 
   useEffect(() => {
     fetchProfiles();
@@ -27,7 +30,8 @@ export default function ProfilesPage() {
   const fetchProfiles = async (search?: string) => {
     try {
       const params = search ? `?search=${encodeURIComponent(search)}` : '';
-      const response = await api.get(`/api/blog/profiles/${params}`);
+      // discoverエンドポイントを使用して、既にいいねしたユーザーを除外
+      const response = await api.get(`/api/blog/profiles/discover/${params}`);
       // レスポンスが配列かオブジェクトか確認
       const data = Array.isArray(response.data) ? response.data : response.data.results || [];
       setProfiles(data);
@@ -46,10 +50,26 @@ export default function ProfilesPage() {
 
   const handleLike = async (userId: number) => {
     try {
-      await api.post('/api/blog/likes/', { to_user: userId });
-      alert('いいねを送信しました！');
-    } catch (error) {
-      alert('いいねの送信に失敗しました');
+      const response = await api.post('/api/blog/likes/', { to_user: userId });
+      
+      // マッチングが成立したかチェック
+      if (response.data.matched) {
+        setMatchNotification({show: true, matchId: response.data.match_id});
+        // プロフィールリストから削除
+        setProfiles(profiles.filter(p => p.user_id !== userId));
+      } else {
+        alert('いいねを送信しました！');
+        // プロフィールリストから削除
+        setProfiles(profiles.filter(p => p.user_id !== userId));
+      }
+    } catch (error: any) {
+      if (error.response?.data?.message === 'Already liked') {
+        alert('既にいいね済みです');
+        // プロフィールリストから削除
+        setProfiles(profiles.filter(p => p.user_id !== userId));
+      } else {
+        alert('いいねの送信に失敗しました');
+      }
     }
   };
 
@@ -61,6 +81,36 @@ export default function ProfilesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* マッチング成立通知モーダル */}
+      {matchNotification.show && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
+            <div className="text-6xl mb-4">🎉</div>
+            <h2 className="text-2xl font-bold text-pink-600 mb-4">
+              マッチング成立！
+            </h2>
+            <p className="text-gray-600 mb-6">
+              おめでとうございます！<br />
+              相手もあなたにいいねしました。
+            </p>
+            <div className="flex space-x-4">
+              <button
+                onClick={() => setMatchNotification({show: false, matchId: null})}
+                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+              >
+                閉じる
+              </button>
+              <button
+                onClick={() => router.push(`/messages?match=${matchNotification.matchId}`)}
+                className="flex-1 px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700"
+              >
+                メッセージを送る
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
@@ -73,6 +123,9 @@ export default function ProfilesPage() {
               </Link>
               <Link href="/profiles" className="text-pink-600 font-semibold">
                 ユーザー検索
+              </Link>
+              <Link href="/likes" className="text-gray-700 hover:text-pink-600">
+                いいね
               </Link>
               <Link href="/matches" className="text-gray-700 hover:text-pink-600">
                 マッチング
@@ -141,14 +194,27 @@ export default function ProfilesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {profiles.map((profile) => (
               <div key={profile.id} className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold mb-2">{profile.display_name}</h3>
-                <p className="text-gray-600 text-sm mb-2">@{profile.username}</p>
-                {profile.age && <p className="text-gray-600 text-sm">{profile.age}歳</p>}
-                {profile.location && <p className="text-gray-600 text-sm">{profile.location}</p>}
-                {profile.bio && <p className="text-gray-700 mt-3">{profile.bio}</p>}
+                <div className="flex flex-col items-center mb-4">
+                  <div className="w-24 h-24 bg-pink-100 rounded-full flex items-center justify-center text-4xl mb-3">
+                    {profile.avatar ? (
+                      <img 
+                        src={profile.avatar} 
+                        alt={profile.display_name}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      '👤'
+                    )}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-1">{profile.display_name}</h3>
+                  <p className="text-gray-600 text-sm mb-2">@{profile.username}</p>
+                </div>
+                {profile.age && <p className="text-gray-600 text-sm">🎂 {profile.age}歳</p>}
+                {profile.location && <p className="text-gray-600 text-sm">📍 {profile.location}</p>}
+                {profile.bio && <p className="text-gray-700 mt-3 text-sm">{profile.bio}</p>}
                 <button
-                  onClick={() => handleLike(profile.id)}
-                  className="mt-4 w-full py-2 bg-pink-600 text-white rounded hover:bg-pink-700"
+                  onClick={() => handleLike(profile.user_id)}
+                  className="mt-4 w-full py-2 bg-pink-600 text-white rounded hover:bg-pink-700 transition-colors"
                 >
                   ❤️ いいね
                 </button>

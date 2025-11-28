@@ -93,6 +93,27 @@ class Match(models.Model):
         return match, created
 
 
+class Block(models.Model):
+    """ブロックモデル"""
+    blocker = models.ForeignKey(User, verbose_name='ブロックした人', on_delete=models.CASCADE, related_name='blocking')
+    blocked = models.ForeignKey(User, verbose_name='ブロックされた人', on_delete=models.CASCADE, related_name='blocked_by')
+    created_at = models.DateTimeField('ブロック日時', auto_now_add=True)
+    reason = models.CharField('理由', max_length=200, blank=True)
+    
+    class Meta:
+        verbose_name = 'ブロック'
+        verbose_name_plural = 'ブロック'
+        unique_together = ['blocker', 'blocked']
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['blocker', 'blocked']),
+            models.Index(fields=['-created_at']),
+        ]
+    
+    def __str__(self):
+        return f'{self.blocker.username} → {self.blocked.username}'
+
+
 class Message(models.Model):
     """メッセージモデル"""
     match = models.ForeignKey(Match, verbose_name='マッチング', on_delete=models.CASCADE, related_name='messages')
